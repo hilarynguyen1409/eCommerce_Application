@@ -1,0 +1,42 @@
+pipeline {
+    agent any  // Jenkins will run on any available agent
+
+    stages {
+        stage('Build') {
+            steps {
+                // Use Maven to clean and build the application
+                sh 'mvn clean package'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                // Run unit tests
+                sh 'mvn test'
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                // Build Docker image
+                sh 'docker build -t my-ecommerce-app .'
+            }
+        }
+
+        stage('Docker Run') {
+            steps {
+                // Deploy Docker container
+                sh 'docker run -d -p 8081:8080 my-ecommerce-app'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Build and deployment succeeded!'
+        }
+        failure {
+            echo 'Build or deployment failed.'
+        }
+    }
+}

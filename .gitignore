@@ -1,6 +1,21 @@
-/target/
+# Maven / Gradle
+target/
 *.log
-.idea/
-.vscode/
-*.iml
 *.class
+*.jar
+.mvn/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Environment Variables
+*.env

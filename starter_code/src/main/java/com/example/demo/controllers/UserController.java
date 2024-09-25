@@ -1,10 +1,12 @@
 package com.example.demo.controllers;
 
-import java.util.Optional;
+import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +23,7 @@ import com.example.demo.model.requests.CreateUserRequest;
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
+	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 	
 	@Autowired
 	private UserRepository userRepository;
@@ -28,7 +31,13 @@ public class UserController {
 	@Autowired
 	private CartRepository cartRepository;
 
-	@GetMapping("/id/{id}")
+	private final PasswordEncoder passwordEncoder;
+
+    public UserController(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @GetMapping("/id/{id}")
 	public ResponseEntity<User> findById(@PathVariable Long id) {
 		return ResponseEntity.of(userRepository.findById(id));
 	}
@@ -38,16 +47,30 @@ public class UserController {
 		User user = userRepository.findByUsername(username);
 		return user == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(user);
 	}
-	
+
 	@PostMapping("/create")
 	public ResponseEntity<User> createUser(@RequestBody CreateUserRequest createUserRequest) {
 		User user = new User();
 		user.setUsername(createUserRequest.getUsername());
+
+		if (createUserRequest.getPassword().length() < 8) {
+			logger.error("Failed to create user: password too short");
+			return ResponseEntity.badRequest().build();
+		}
+
+		if (!createUserRequest.getPassword().equals(createUserRequest.getConfirmPassword())) {
+			logger.error("Failed to create user: password mismatch");
+			return ResponseEntity.badRequest().build();
+		}
+
+		user.setPassword(passwordEncoder.encode(createUserRequest.getPassword()));
+
 		Cart cart = new Cart();
 		cartRepository.save(cart);
 		user.setCart(cart);
 		userRepository.save(user);
+
+		logger.info("User created successfully: " + user.getUsername());
 		return ResponseEntity.ok(user);
 	}
-	
 }
