@@ -19,11 +19,10 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
-    public SecurityConfig(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+
+    public SecurityConfig(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
 

@@ -2,11 +2,18 @@ package com.example.demo.model.requests;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 public class CreateUserRequest {
 
+	@NotNull(message = "Username cannot be null")
+	@NotEmpty(message = "Username is required")
 	@JsonProperty
 	private String username;
 
+	@NotNull(message = "Password cannot be null")
+	@NotEmpty(message = "Password is required")
 	@JsonProperty
 	private String password;
 

@@ -6,41 +6,37 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "cart")
 public class Cart {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@JsonProperty
-	@Column
 	private Long id;
-	
+
 	@ManyToMany
+	@JoinTable(
+			name = "cart_items", // This join table connects Cart with Items
+			joinColumns = @JoinColumn(name = "cart_id"),
+			inverseJoinColumns = @JoinColumn(name = "item_id")
+	)
 	@JsonProperty
-	@Column
-    private List<Item> items;
-	
-	@OneToOne(mappedBy = "cart")
+	private List<Item> items = new ArrayList<>();
+
+	@OneToOne(mappedBy = "cart", cascade = CascadeType.ALL)
 	@JsonProperty
-    private User user;
-	
-	@Column
+	private User user;
+
+	@Column(nullable = false)
 	@JsonProperty
-	private BigDecimal total;
-	
+	private BigDecimal total = BigDecimal.ZERO;
+
+
 	public BigDecimal getTotal() {
 		return total;
 	}
@@ -72,7 +68,7 @@ public class Cart {
 	public void setItems(List<Item> items) {
 		this.items = items;
 	}
-	
+
 	public void addItem(Item item) {
 		if(items == null) {
 			items = new ArrayList<>();
@@ -83,7 +79,7 @@ public class Cart {
 		}
 		total = total.add(item.getPrice());
 	}
-	
+
 	public void removeItem(Item item) {
 		if(items == null) {
 			items = new ArrayList<>();
